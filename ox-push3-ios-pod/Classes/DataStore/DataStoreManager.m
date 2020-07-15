@@ -131,24 +131,18 @@
 -(int)incrementCountForToken:(TokenEntity*)tokenEntity{
     
     NSMutableArray* tokenArray = (NSMutableArray*)[[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES];
-    NSMutableArray* newTokenArray = [[NSMutableArray alloc] initWithArray:tokenArray];
-    int intCount = 0;
-    if (tokenArray != nil){
-        for (NSData* tokenData in [newTokenArray copy]){
-            TokenEntity* token = (TokenEntity*)[NSKeyedUnarchiver unarchiveObjectWithData:tokenData];
-            if ([token isKindOfClass:[TokenEntity class]] && [token.ID isEqualToString:tokenEntity.ID] && [token.userName isEqualToString:tokenEntity.userName]) {
-                [newTokenArray removeObject:tokenData];
-                NSString* count = tokenEntity.count;
-                intCount = [count intValue];
-                intCount += 1;
-                tokenEntity.count = [NSString stringWithFormat:@"%d", intCount];
-                [newTokenArray addObject:tokenEntity];
-            }
-        }
-    }
-    
-	[self saveUpdatedTokenArray: newTokenArray];
-    return intCount;
+	TokenEntity* existingToken = [self getTokenEntityForApplication: tokenEntity.application userName: tokenEntity.userName];
+	
+	if existingToken != nil {
+		int intCount = [existingToken.count intVaue];
+		intCount.count += 1
+		existingToken.count = [NSString stringWithFormat:@"%d", intCount];
+		[self saveUpdatedTokenArray: tokenArray];
+		
+		return intCount
+	}
+	
+    return 0;
 }
 
 -(BOOL)deleteTokenEntityForApplication:(NSString*)app userName:(NSString*) userName {
