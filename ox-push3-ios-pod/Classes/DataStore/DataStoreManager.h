@@ -31,6 +31,6 @@
 
 - (BOOL)isUniqueTokenName:(NSString *)tokenName;
 
-- (void)editTokenName:(TokenEntity *)tokenEdited name:(NSString *) newName
+- (void)editTokenName:(TokenEntity *)tokenEdited name:(NSString *) newName;
 
 @end
