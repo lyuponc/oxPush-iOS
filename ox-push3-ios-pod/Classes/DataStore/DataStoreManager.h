@@ -15,12 +15,13 @@
 
 + (instancetype) sharedInstance;
 
+
 -(void)saveTokenEntity:(TokenEntity*)tokenEntity;
 -(int)incrementCountForToken:(TokenEntity*)tokenEntity;
--(NSArray*)getTokenEntitiesByID:(NSString*)keyID userName:(NSString*)userName;
+-(NSArray*)getTokenEntityForApplication:(NSString*)app userName:(NSString*)userName;
 -(NSArray*)getTokenEntities;
 -(TokenEntity*)getTokenEntityByKeyHandle:(NSString*)keyHandle;
--(BOOL)deleteTokenEntitiesByID:(NSString*)keyID userName:(NSString*) userName;
+-(BOOL)deleteTokenEntityForApplication:(NSString*)app userName:(NSString*) userName;
 
 -(void)saveUserLoginInfo:(UserLoginInfo*)userLoginInfo;
 -(NSArray*)getUserLoginInfo;
@@ -30,6 +31,6 @@
 
 - (BOOL)isUniqueTokenName:(NSString *)tokenName;
 
--(void)setTokenEntitiesNameByID:(NSString*)keyID userName:(NSString*)userName newName:(NSString*)newName;
+- (void)editTokenName:(TokenEntity *)tokenEdited name:(NSString *) newName
 
 @end
