@@ -74,9 +74,14 @@
                     __block BOOL isResult = NO;
                     
 					TokenEntity* tokenEntity = [[DataStoreManager sharedInstance] getTokenEntityForApplication:app userName:username];
+					
+					// check to see if this is a new device or the user deleted the token.
 					if (tokenEntity == nil) {
 						NSError *err = [[NSError alloc] init];
-						err.message = "No token found for this application. Please remove this device and re-enroll it.";
+						
+						NSDictionary *userInfo = @{"message": @"No token found for this application. Please remove this device and re-enroll it."};
+						err.userInfo = userInfo;
+						
 						handler(nil, err);
 						return;
 					}
