@@ -113,7 +113,7 @@
     return nil;
 }
 
-- (void)saveUpdatedTokenArray(NSMutableArray *)tokenArray {
+- (void)saveUpdatedTokenArray:(NSMutableArray *)tokenArray {
 	NSMutableArray *archiveArray = [NSMutableArray arrayWithCapacity:tokenArray.count];
 	for (TokenEntity *tokenEntity in newTokenArray) {
 		if ([tokenEntity isKindOfClass:[NSData class]]){
@@ -214,7 +214,7 @@
 	return YES;
 }
 
-- (void)saveUpdatedUserLoginInfo: (NSMutableArray *) logs {
+- (void)saveUpdatedUserLoginInfo:(NSMutableArray *) logs {
 	NSMutableArray *archiveArray = [NSMutableArray arrayWithCapacity:newlogs.count];
 	for (UserLoginInfo *userLoginEntity in newlogs) {
 		NSData *personEncodedObject = [NSKeyedArchiver archivedDataWithRootObject:userLoginEntity];
