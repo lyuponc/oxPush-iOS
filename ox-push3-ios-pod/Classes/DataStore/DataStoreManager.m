@@ -93,7 +93,7 @@
 	
 	TokenEntity* existingToken = [self getTokenEntityForApplication: tokenEdited.application userName: tokenEdited.userName];
 	
-	if existingToken != nil {
+	if (existingToken != nil) {
 		existingToken.keyName = newName;
 		[self saveUpdatedTokenArray: newTokenArray];
 	}
@@ -133,7 +133,7 @@
     NSMutableArray* tokenArray = (NSMutableArray*)[[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES];
 	TokenEntity* existingToken = [self getTokenEntityForApplication: tokenEntity.application userName: tokenEntity.userName];
 	
-	if existingToken != nil {
+	if (existingToken != nil) {
 		int intCount = [existingToken.count intVaue];
 		intCount.count += 1;
 		existingToken.count = [NSString stringWithFormat:@"%d", intCount];
