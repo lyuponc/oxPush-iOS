@@ -65,26 +65,28 @@
                 NSString* keyID = [oxRequest app];
                 NSArray* tokenEntities = [[DataStoreManager sharedInstance] getTokenEntitiesByID:keyID userName:username];
                 NSString* u2fEndpoint = [[NSString alloc] init];
-                BOOL isEnroll = [method isEqualToString:ENROLL_METHOD];//[tokenEntities count] > 0 ? NO : YES;
+                BOOL isEnroll = [method isEqualToString:ENROLL_METHOD];
                 if (isEnroll){//registration
                     u2fEndpoint = [u2fMetaData registrationEndpoint];
                 } else {//authentication
                     u2fEndpoint = [u2fMetaData authenticationEndpoint];
                 }
                 
-                if (!oneStep && !isEnroll){
+                if (!oneStep && !isEnroll) {
                     __block BOOL isResult = NO;
                     
-                    TokenEntity *tokenEntity;
-                    if (tokenEntities.count > 0) {
-                        tokenEntity = tokenEntities[0];
-                        
-                        NSString* kHandle = tokenEntity.keyHandle;
-                        if (kHandle != nil){
-                            [parameters setObject:kHandle forKey:@"keyhandle"];
-                        }
-                    }
-                    
+					TokenEntity* tokenEntity = [[DataStoreManager sharedInstance] getTokenEntityForApplication:app userName:username];
+					if (tokenEntity == nil)
+						NSError *err = [[NSError alloc] init];
+					err.message = "No token found for this application. Please remove this device and re-enroll it.";
+						handler(nil, err);
+						return;
+					}
+				
+					if (tokenEntity.keyHandle != nil) {
+						[parameters setObject:tokenEntity.keyHandle forKey:@"keyhandle"];
+					}
+
                     [[ApiServiceManager sharedInstance] doGETUrl:u2fEndpoint :parameters callback:^(NSDictionary *result,NSError *error){
                         if (error) {
                             handler(nil , error);
