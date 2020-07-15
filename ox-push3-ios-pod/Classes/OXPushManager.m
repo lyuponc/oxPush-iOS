@@ -61,9 +61,7 @@
                 }
                 
                 U2fMetaData* u2fMetaData = [[U2fMetaData alloc] initWithVersion:version issuer:issuer authenticationEndpoint:authenticationEndpoint registrationEndpoint:registrationEndpoint];
-                    // Next step - get exist keys from database
-                NSString* keyID = [oxRequest app];
-                NSArray* tokenEntities = [[DataStoreManager sharedInstance] getTokenEntitiesByID:keyID userName:username];
+
                 NSString* u2fEndpoint = [[NSString alloc] init];
                 BOOL isEnroll = [method isEqualToString:ENROLL_METHOD];
                 if (isEnroll){//registration
@@ -76,9 +74,9 @@
                     __block BOOL isResult = NO;
                     
 					TokenEntity* tokenEntity = [[DataStoreManager sharedInstance] getTokenEntityForApplication:app userName:username];
-					if (tokenEntity == nil)
+					if (tokenEntity == nil) {
 						NSError *err = [[NSError alloc] init];
-					err.message = "No token found for this application. Please remove this device and re-enroll it.";
+						err.message = "No token found for this application. Please remove this device and re-enroll it.";
 						handler(nil, err);
 						return;
 					}
