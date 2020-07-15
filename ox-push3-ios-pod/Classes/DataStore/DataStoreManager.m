@@ -95,7 +95,7 @@
 	
 	if (existingToken != nil) {
 		existingToken.keyName = newName;
-		[self saveUpdatedTokenArray: newTokenArray];
+		[self saveUpdatedTokenArray: tokenArray];
 	}
 }
 
@@ -115,7 +115,7 @@
 
 - (void)saveUpdatedTokenArray:(NSMutableArray *)tokenArray {
 	NSMutableArray *archiveArray = [NSMutableArray arrayWithCapacity:tokenArray.count];
-	for (TokenEntity *tokenEntity in newTokenArray) {
+	for (TokenEntity *tokenEntity in tokenArray) {
 		if ([tokenEntity isKindOfClass:[NSData class]]){
 			[archiveArray addObject:tokenEntity];
 		} else {
@@ -134,8 +134,8 @@
 	TokenEntity* existingToken = [self getTokenEntityForApplication: tokenEntity.application userName: tokenEntity.userName];
 	
 	if (existingToken != nil) {
-		int intCount = [existingToken.count intVaue];
-		intCount.count += 1;
+		int intCount = [existingToken.count intValue];
+		intCount += 1;
 		existingToken.count = [NSString stringWithFormat:@"%d", intCount];
 		[self saveUpdatedTokenArray: tokenArray];
 		
@@ -215,8 +215,8 @@
 }
 
 - (void)saveUpdatedUserLoginInfo:(NSMutableArray *) logs {
-	NSMutableArray *archiveArray = [NSMutableArray arrayWithCapacity:newlogs.count];
-	for (UserLoginInfo *userLoginEntity in newlogs) {
+	NSMutableArray *archiveArray = [NSMutableArray arrayWithCapacity: logs.count];
+	for (UserLoginInfo *userLoginEntity in logs) {
 		NSData *personEncodedObject = [NSKeyedArchiver archivedDataWithRootObject:userLoginEntity];
 		[archiveArray addObject:personEncodedObject];
 	}
