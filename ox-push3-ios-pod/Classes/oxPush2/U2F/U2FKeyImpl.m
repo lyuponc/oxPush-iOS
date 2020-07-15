@@ -105,13 +105,6 @@ int keyHandleLength = 64;
     //    NSData* keyHandle = [request keyHandle];
     
 	TokenEntity* tokenEntity = [[DataStoreManager sharedInstance] getTokenEntityForApplication:application userName:userName];
-    
-	if (tokenEntity == nil)
-        NSError *err = [[NSError alloc] init];
-	err.message = "No token found for this application. Please remove this device and re-enroll it.";
-        handler(nil, err);
-        return;
-    }
 
     NSData* applicationSha256 = [[application SHA256] dataUsingEncoding:NSUTF8StringEncoding];
     NSData* challengeSha256 = [[challenge SHA256] dataUsingEncoding:NSUTF8StringEncoding];

@@ -77,12 +77,9 @@
 					
 					// check to see if this is a new device or the user deleted the token.
 					if (tokenEntity == nil) {
-						NSError *err = [[NSError alloc] init];
+						NSError *error = [[NSError alloc] initWithDomain:@"" code:123 userInfo:@{@"Error reason": @"No token found for this application. Please remove this device and re-enroll it."}];
 						
-						NSDictionary *userInfo = @{"message": @"No token found for this application. Please remove this device and re-enroll it."};
-						err.userInfo = userInfo;
-						
-						handler(nil, err);
+						handler(nil, error);
 						return;
 					}
 				
