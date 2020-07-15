@@ -10,7 +10,6 @@
 
 @interface TokenEntity : NSObject <NSCoding>
 
-@property (strong, nonatomic) NSString* ID;
 @property (strong, nonatomic) NSString* application;
 @property (strong, nonatomic) NSString* issuer;
 @property (strong, nonatomic) NSString* privateKey;
@@ -23,9 +22,5 @@
 @property (strong, nonatomic) NSString* count;
 @property (strong, nonatomic) NSString* keyName;
 
-
-
--(id)initWithID:(NSString*)ID privateKey:(NSData*)privateKey publicKey:(NSData*)publicKey;
--(BOOL)isExternalKey;
 
 @end

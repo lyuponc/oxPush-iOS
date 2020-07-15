@@ -9,22 +9,12 @@
 #import "TokenEntity.h"
 
 @implementation TokenEntity
-
--(id)initWithID:(NSString*)iD privateKey:(NSString*)PrivateKey publicKey:(NSString*)PublicKey{
-
-    _ID = iD;
-    _privateKey = PrivateKey;
-    _publicKey = PublicKey;
-    
-    return self;
-}
     
 /* This code has been added to support encoding and decoding my objecst */
     
 -(void)encodeWithCoder:(NSCoder *)encoder
     {
         //Encode the properties of the object
-        [encoder encodeObject:_ID forKey:@"ID"];
         [encoder encodeObject:_application forKey:@"application"];
         [encoder encodeObject:_issuer forKey:@"issuer"];
         [encoder encodeObject:_privateKey forKey:@"privateKey"];
@@ -44,7 +34,6 @@
         if ( self != nil )
         {
             //decode the properties
-            _ID = [decoder decodeObjectForKey:@"ID"];
             _application = [decoder decodeObjectForKey:@"application"];
             _issuer = [decoder decodeObjectForKey:@"issuer"];
             _privateKey = [decoder decodeObjectForKey:@"privateKey"];
@@ -59,9 +48,5 @@
         }
         return self;
     }
-
--(BOOL)isExternalKey{
-    return [_privateKey isEqualToString:@""] || [_publicKey isEqualToString:@""];
-}
 
 @end
