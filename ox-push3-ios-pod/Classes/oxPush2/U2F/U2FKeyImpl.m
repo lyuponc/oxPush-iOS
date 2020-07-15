@@ -42,7 +42,7 @@ int keyHandleLength = 64;
     return self;
 }
 
--(void) registerRequest:(EnrollmentRequest*)enrollmentRequest isDecline:(BOOL)isDecline isSecureClick:(BOOL)isSecureClick callback:(SecureClickCompletionHandler)handler {
+-(void)handleEnrollmentRequest:(EnrollmentRequest*)enrollmentRequest isDecline:(BOOL)isDecline isSecureClick:(BOOL)isSecureClick callback:(SecureClickCompletionHandler)handler {
     
     NSString* application = [enrollmentRequest application];
     NSString* challenge = [enrollmentRequest challenge];
@@ -60,8 +60,6 @@ int keyHandleLength = 64;
     if (!isDecline){
         //Save new key into database
         TokenEntity* newTokenEntity = [[TokenEntity alloc] init];
-        NSString* keyID = application;
-        newTokenEntity.ID = keyID;
         newTokenEntity.application = application;
         newTokenEntity.issuer = [enrollmentRequest issuer];
         newTokenEntity.keyHandle = [keyHandle base64EncodedString];
@@ -99,20 +97,18 @@ int keyHandleLength = 64;
     }
 }
 
--(void)autenticate:(AuthenticateRequest*)request isSecureClick:(BOOL)isSecureClick userName:(NSString*)userName callback:(SecureClickAuthCompletionHandler)handler{
+-(void)handleAuthenticationRequest:(AuthenticateRequest*)request isSecureClick:(BOOL)isSecureClick userName:(NSString*)userName callback:(SecureClickAuthCompletionHandler)handler{
     isAuthSent = false;
     //    NSData* control = [request control];
     NSString* application = [request application];
     NSString* challenge = [request challenge];
     //    NSData* keyHandle = [request keyHandle];
-    TokenEntity* tokenEntity = nil;
-    NSArray* tokenEntities = [[DataStoreManager sharedInstance] getTokenEntitiesByID:application userName:userName];
-    if ([tokenEntities count] > 0){
-        tokenEntity = [tokenEntities objectAtIndex:0];
-    } else {
-        //No token(s) found
-        
+    
+	TokenEntity* tokenEntity = [[DataStoreManager sharedInstance] getTokenEntityForApplication:application userName:userName];
+    
+	if (tokenEntity == nil)
         NSError *err = [[NSError alloc] init];
+	err.message = "No token found for this application. Please remove this device and re-enroll it.";
         handler(nil, err);
         return;
     }
