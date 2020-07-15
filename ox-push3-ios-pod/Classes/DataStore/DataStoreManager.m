@@ -71,7 +71,7 @@
         }
     }
 	
-	return nil
+	return nil;
 }
     
 -(NSArray*)getTokenEntities{
@@ -94,7 +94,7 @@
 	TokenEntity* existingToken = [self getTokenEntityForApplication: tokenEdited.application userName: tokenEdited.userName];
 	
 	if existingToken != nil {
-		existingToken.keyName = newName
+		existingToken.keyName = newName;
 		[self saveUpdatedTokenArray: newTokenArray];
 	}
 }
@@ -135,11 +135,11 @@
 	
 	if existingToken != nil {
 		int intCount = [existingToken.count intVaue];
-		intCount.count += 1
+		intCount.count += 1;
 		existingToken.count = [NSString stringWithFormat:@"%d", intCount];
 		[self saveUpdatedTokenArray: tokenArray];
 		
-		return intCount
+		return intCount;
 	}
 	
     return 0;
