@@ -18,7 +18,7 @@
 
 -(void)saveTokenEntity:(TokenEntity*)tokenEntity;
 -(int)incrementCountForToken:(TokenEntity*)tokenEntity;
--(NSArray*)getTokenEntityForApplication:(NSString*)app userName:(NSString*)userName;
+-(TokenEntity*)getTokenEntityForApplication:(NSString*)app userName:(NSString*)userName;
 -(NSArray*)getTokenEntities;
 -(TokenEntity*)getTokenEntityByKeyHandle:(NSString*)keyHandle;
 -(BOOL)deleteTokenEntityForApplication:(NSString*)app userName:(NSString*) userName;

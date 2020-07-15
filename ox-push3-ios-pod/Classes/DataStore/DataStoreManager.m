@@ -60,7 +60,7 @@
     return true;
 }
     
--(NSArray*)getTokenEntityForApplication:(NSString*)app userName:(NSString*)userName {
+-(TokenEntity*)getTokenEntityForApplication:(NSString*)app userName:(NSString*)userName {
     NSMutableArray* tokenArray = [[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES];
     if (tokenArray != nil){
         for (NSData* tokenData in tokenArray){
