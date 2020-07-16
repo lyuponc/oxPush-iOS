@@ -203,11 +203,11 @@
 		[existingLogs removeObject: log];
     }
 	
-	[self saveUpdatedUserLoginInfo: logs];
+	[self saveUpdatedUserLoginInfo: existingLogs];
 }
 
 -(void)deleteLog:(UserLoginInfo*) log {
-	[self deleteLogs:[NSArray arrayWithObjects:log];
+	[self deleteLogs:[NSArray arrayWithObjects:log]];
 }
 
 -(BOOL)deleteAllLogs{
