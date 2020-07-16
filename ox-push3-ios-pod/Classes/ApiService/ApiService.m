@@ -96,8 +96,17 @@
 
 //---------------------- END OF HTTP REQUEST MANAGER ---------------------------------
 
--(void)callPOSTMultiPartAPIService:(NSString*)url andParameters:(NSDictionary*)parameters isDecline:(BOOL)isDecline callback:(RequestCompletionHandler)handler{
-    BOOL isEnroll = [url rangeOfString:@"registration"].location != NSNotFound ? YES : NO;
+- (BOOL)isSuccessResponse:(NSHTTPURLResponse*) response {
+	if (response != nil && [response statusCode] >=200 && [response statusCode] <300) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+-(void)callPOSTMultiPartAPIService:(NSString*)url andParameters:(NSDictionary*)parameters isDecline:(BOOL)isDecline callback:(RequestCompletionHandler)handler {
+    
+	BOOL isEnroll = [url rangeOfString:@"registration"].location != NSNotFound ? YES : NO;
     // the server url to which the image (or the media) is uploaded. Use your server url here
     NSURL *baseUrl = [NSURL URLWithString:url];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:baseUrl];
@@ -107,19 +116,25 @@
     
     NSMutableData *body = [NSMutableData data];
     [body appendData:[[NSString stringWithFormat:@"username=%@", @""] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[[NSString stringWithFormat:@"&tokenResponse=%@", [parameters objectForKey:@"tokenResponse"]] dataUsingEncoding:NSUTF8StringEncoding]];
-    [request setHTTPBody:body];
+    
+	[body appendData:[[NSString stringWithFormat:@"&tokenResponse=%@", [parameters objectForKey:@"tokenResponse"]] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+	[request setHTTPBody:body];
 
     NSHTTPURLResponse* response = nil;
     NSError* error;
     
     NSData* urlData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    [UserLoginInfo sharedInstance].created = [NSString stringWithFormat:@"%@", [NSDate date]];
-    if (response != nil && [response statusCode] >=200 && [response statusCode] <300){
-        NSDictionary *jsonData = [NSJSONSerialization JSONObjectWithData:urlData options:kNilOptions error:&error];
-        handler(jsonData, nil);
-        if([[jsonData objectForKey:@"status"] isEqualToString:@"success"])
-        {
+    
+	[UserLoginInfo sharedInstance].created = [NSString stringWithFormat:@"%@", [NSDate date]];
+    
+	if ([self isSuccessResponse:response]) {
+        
+		NSDictionary *jsonData = [NSJSONSerialization JSONObjectWithData:urlData options:kNilOptions error:&error];
+        
+		handler(jsonData, nil);
+        
+		if([[jsonData objectForKey:@"status"] isEqualToString:@"success"]) {
             if (isDecline){
                 if (isEnroll){
                     [UserLoginInfo sharedInstance].logState = ENROLL_DECLINED;
@@ -130,31 +145,30 @@
                     [UserLoginInfo sharedInstance].errorMessage = @"Login was declined";
                     [[DataStoreManager sharedInstance] saveUserLoginInfo:[UserLoginInfo sharedInstance]];
                 }
-//                [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_DECLINE_SUCCESS object:urlData];
             } else {
                 if (isEnroll){
                     [UserLoginInfo sharedInstance].logState = ENROLL_SUCCESS;
                     [[DataStoreManager sharedInstance] saveUserLoginInfo:[UserLoginInfo sharedInstance]];
-//                    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_REGISTRATION_SUCCESS object:urlData];
                 } else {
                     [UserLoginInfo sharedInstance].logState = LOGIN_SUCCESS;
                     [[DataStoreManager sharedInstance] saveUserLoginInfo:[UserLoginInfo sharedInstance]];
-//                    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_AUTENTIFICATION_SUCCESS object:urlData];
                 }
             }
-        }else{
+			
+        // Not Success status
+			
+		} else {
             handler(nil, error);
                 if (isEnroll){
                     [UserLoginInfo sharedInstance].logState = ENROLL_FAILED;
                     [[DataStoreManager sharedInstance] saveUserLoginInfo:[UserLoginInfo sharedInstance]];
-//                    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_REGISTRATION_FAILED object:nil];
                 } else {
                     [UserLoginInfo sharedInstance].logState = LOGIN_FAILED;
                     [[DataStoreManager sharedInstance] saveUserLoginInfo:[UserLoginInfo sharedInstance]];
-//                    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_AUTENTIFICATION_FAILED object:nil];
                 }
         }
-    } else{
+	// error or unsuccessful response
+    } else {
         handler(nil, error);
         NSString* erStr = [[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding];
         NSLog(@"ERROR MESSAGE - %@", erStr);
@@ -162,37 +176,32 @@
         NSDictionary* jsonError = [NSJSONSerialization JSONObjectWithData:urlData
                                                              options:kNilOptions
                                                                error:&error];
-        NSString* errroMessage = @"";
+        NSString* errrorMessage = @"";
         if (jsonError != nil){
             NSString* reason = [jsonError valueForKey:@"error_description"];
             if (reason != nil){
-                errroMessage = reason;
+                errrorMessage = reason;
             } else {
-                errroMessage = erStr;
+                errrorMessage = erStr;
             }
         } else {
-            errroMessage = erStr;
+            errrorMessage = erStr;
         }
 
-        if (isDecline){
-//            [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_DECLINE_FAILED object:nil];
+        if (isDecline) {
+			// not handling this currently
         } else {
             if (isEnroll){
                 [UserLoginInfo sharedInstance].logState = ENROLL_FAILED;
-                [UserLoginInfo sharedInstance].errorMessage = errroMessage;
+                [UserLoginInfo sharedInstance].errorMessage = errrorMessage;
                 [[DataStoreManager sharedInstance] saveUserLoginInfo:[UserLoginInfo sharedInstance]];
-//                [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_REGISTRATION_FAILED object:nil];
             } else {
                 [UserLoginInfo sharedInstance].logState = LOGIN_FAILED;
-                [UserLoginInfo sharedInstance].errorMessage = errroMessage;
+                [UserLoginInfo sharedInstance].errorMessage = errrorMessage;
                 [[DataStoreManager sharedInstance] saveUserLoginInfo:[UserLoginInfo sharedInstance]];
-//                [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_AUTENTIFICATION_FAILED object:nil];
             }
         }
     }
-
-//    NSString* code = [responce ];
-    // {"status":"success","challenge":"gkJaeu9_frj72yQ04RYZxajzz2Kg9s4YLht52WY0_S4"}
 }
 
 @end
