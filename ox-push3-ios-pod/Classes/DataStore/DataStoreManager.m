@@ -199,7 +199,7 @@
 -(void)deleteLogs:(NSArray*)logs{
 	NSMutableArray* existingLogs = [[[NSUserDefaults standardUserDefaults] valueForKey:USER_INFO_ENTITIES] mutableCopy];
     
-	for (UserLoginInfo* info in logs){
+	for (UserLoginInfo* log in logs){
 		[existingLogs removeObject: log];
     }
 	
