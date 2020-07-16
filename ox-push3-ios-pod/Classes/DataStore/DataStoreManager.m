@@ -30,14 +30,19 @@
 
 -(void)saveTokenEntity:(TokenEntity*)tokenEntity {
 	
-	[self deleteTokenEntityForApplication: tokenEntity.application userName: tokenEntity.userName];
+	TokenEntity* existingToken = [self getTokenEntityForApplication:tokenEntity.application userName:tokenEntity.userName];
 	
-	NSMutableArray* tokenArray = [[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES];
+	NSMutableArray* tokenArray = [[[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES] mutableCopy];
+	
     if (tokenArray != nil){
         [tokenArray insertObject:tokenEntity atIndex:0];
     } else {
         tokenArray = [[NSMutableArray alloc] initWithObjects:tokenEntity, nil];
     }
+	
+	if (existingToken != nil) {
+		[tokenArray removeObject: existingToken];
+	}
     
 	[self saveUpdatedTokenArray: tokenArray];
     
@@ -89,7 +94,7 @@
 
 - (void)editTokenName:(TokenEntity *)tokenEdited name:(NSString *) newName {
 	
-    NSMutableArray* tokenArray = [[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES];
+    NSMutableArray* tokenArray = [[[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES] mutableCopy];
 	
 	TokenEntity* existingToken = [self getTokenEntityForApplication: tokenEdited.application userName: tokenEdited.userName];
 	
@@ -125,7 +130,7 @@
 	}
 	
 	[[NSUserDefaults standardUserDefaults] setObject:archiveArray forKey:KEY_ENTITIES];
-	NSLog(@"Saved new TokenEntity name in database success");
+	NSLog(@"Saved updated Token Array");
 }
 
 -(int)incrementCountForToken:(TokenEntity*)tokenEntity{
@@ -146,19 +151,20 @@
 }
 
 -(BOOL)deleteTokenEntityForApplication:(NSString*)app userName:(NSString*) userName {
-    NSMutableArray* tokenArray = [[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES];
-    NSMutableArray* newTokenArray = [[NSMutableArray alloc] initWithArray:tokenArray];
-    if (tokenArray != nil){
+    NSMutableArray* tokenArray = [[[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES] mutableCopy];
+    
+	if (tokenArray != nil){
         for (NSData* tokenData in tokenArray){
             TokenEntity* token = [NSKeyedUnarchiver unarchiveObjectWithData:tokenData];
             if ([token.application isEqualToString:app] && [token.userName isEqualToString:userName]) {
-                [newTokenArray removeObject:tokenData];
+                [tokenArray removeObject:tokenData];
             }
         }
     }
     
-	[self saveUpdatedTokenArray: newTokenArray];
-    return NO;
+	[self saveUpdatedTokenArray: tokenArray];
+    
+	return NO;
 }
 
 -(void)saveUserLoginInfo:(UserLoginInfo*)userLoginInfo{
@@ -191,22 +197,17 @@
 }
 
 -(void)deleteLogs:(NSArray*)logs{
-    for (UserLoginInfo* info in logs){
-        [[DataStoreManager sharedInstance] deleteLog:info];
+	NSMutableArray* existingLogs = [[[NSUserDefaults standardUserDefaults] valueForKey:USER_INFO_ENTITIES] mutableCopy];
+    
+	for (UserLoginInfo* info in logs){
+		[existingLogs removeObject: log];
     }
+	
+	[self saveUpdatedUserLoginInfo: logs];
 }
 
 -(void)deleteLog:(UserLoginInfo*) log {
-    NSMutableArray* logs = [[NSUserDefaults standardUserDefaults] valueForKey:USER_INFO_ENTITIES];
-    NSMutableArray* newlogs = [[NSMutableArray alloc] init];
-    for (NSData* logsData in logs){
-        UserLoginInfo* info = (UserLoginInfo*)[NSKeyedUnarchiver unarchiveObjectWithData:logsData];
-        if (![info.created isEqualToString:log.created]){
-            [newlogs addObject:info];
-        }
-    }
-
-	[self saveUpdatedUserLoginInfo: newlogs];
+	[self deleteLogs:[NSArray arrayWithObjects:log];
 }
 
 -(BOOL)deleteAllLogs{
