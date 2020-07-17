@@ -130,6 +130,7 @@
 	}
 	
 	[[NSUserDefaults standardUserDefaults] setObject:archiveArray forKey:KEY_ENTITIES];
+	[[NSUserDefaults standardUserDefaults] synchronize];
 	NSLog(@"Saved updated Token Array");
 }
 
@@ -151,16 +152,14 @@
 }
 
 -(BOOL)deleteTokenEntityForApplication:(NSString*)app userName:(NSString*) userName {
-    NSMutableArray* tokenArray = [[[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES] mutableCopy];
     
-	if (tokenArray != nil){
-        for (NSData* tokenData in tokenArray){
-            TokenEntity* token = [NSKeyedUnarchiver unarchiveObjectWithData:tokenData];
-            if ([token.application isEqualToString:app] && [token.userName isEqualToString:userName]) {
-                [tokenArray removeObject:tokenData];
-            }
-        }
-    }
+	NSMutableArray* tokenArray = [[[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES] mutableCopy];
+    
+	TokenEntity* token = [self getTokenEntityForApplication:app userName:userName];
+	
+	if token != nil {
+		[tokenArray removeObject: token];
+	}
     
 	[self saveUpdatedTokenArray: tokenArray];
     
@@ -223,6 +222,7 @@
 	}
 	
 	[[NSUserDefaults standardUserDefaults] setObject:archiveArray forKey:USER_INFO_ENTITIES];
+	[[NSUserDefaults standardUserDefaults] synchronize];
 	
 	NSLog(@"Saved UserLoginInfoEntity to database success");
 }

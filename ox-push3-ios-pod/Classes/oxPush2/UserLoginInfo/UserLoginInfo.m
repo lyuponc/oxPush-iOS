@@ -64,41 +64,66 @@
     
     /* This code has been added to support encoding and decoding my objecst */
     
--(void)encodeWithCoder:(NSCoder *)encoder
-    {
-        //Encode the properties of the object
-        [encoder encodeObject:_userName forKey:@"userName"];
-        [encoder encodeObject:_created forKey:@"created"];
-        [encoder encodeObject:_application forKey:@"application"];
-        [encoder encodeObject:_issuer forKey:@"issuer"];
-        [encoder encodeObject:_authenticationType forKey:@"authenticationType"];
-        [encoder encodeObject:_authenticationMode forKey:@"authenticationMode"];
-        [encoder encodeObject:_locationIP forKey:@"locationIP"];
-        [encoder encodeObject:_locationCity forKey:@"locationCity"];
-        [encoder encodeObject:[self displayNameForWonderfulType:_logState] forKey:@"logState"];
-        [encoder encodeObject:_errorMessage forKey:@"errorMessage"];
-    }
+-(void)encodeWithCoder:(NSCoder *)encoder {
+	//Encode the properties of the object
+	[encoder encodeObject:_userName forKey:@"userName"];
+	[encoder encodeObject:_created forKey:@"created"];
+	[encoder encodeObject:_application forKey:@"application"];
+	[encoder encodeObject:_issuer forKey:@"issuer"];
+	[encoder encodeObject:_authenticationType forKey:@"authenticationType"];
+	[encoder encodeObject:_authenticationMode forKey:@"authenticationMode"];
+	[encoder encodeObject:_locationIP forKey:@"locationIP"];
+	[encoder encodeObject:_locationCity forKey:@"locationCity"];
+	[encoder encodeObject:[self displayNameForWonderfulType:_logState] forKey:@"logState"];
+	[encoder encodeObject:_errorMessage forKey:@"errorMessage"];
+}
     
--(id)initWithCoder:(NSCoder *)decoder
-    {
-        self = [super init];
-        if ( self != nil )
-        {
-            //decode the properties
-            _userName = [decoder decodeObjectForKey:@"userName"];
-            _created = [decoder decodeObjectForKey:@"created"];
-            _application = [decoder decodeObjectForKey:@"application"];
-            _issuer = [decoder decodeObjectForKey:@"issuer"];
-            _authenticationType = [decoder decodeObjectForKey:@"authenticationType"];
-            _authenticationMode = [decoder decodeObjectForKey:@"authenticationMode"];
-            _locationIP = [decoder decodeObjectForKey:@"locationIP"];
-            _locationCity = [decoder decodeObjectForKey:@"locationCity"];
-            _locationCity = [decoder decodeObjectForKey:@"locationCity"];
-            _logState = [self displayTypeForWonderfulName:[decoder decodeObjectForKey:@"logState"]];
-            _errorMessage = [decoder decodeObjectForKey:@"errorMessage"];
-        }
-        return self;
+-(id)initWithCoder:(NSCoder *)decoder {
+	self = [super init];
+	if ( self != nil )
+	{
+		//decode the properties
+		_userName = [decoder decodeObjectForKey:@"userName"];
+		_created = [decoder decodeObjectForKey:@"created"];
+		_application = [decoder decodeObjectForKey:@"application"];
+		_issuer = [decoder decodeObjectForKey:@"issuer"];
+		_authenticationType = [decoder decodeObjectForKey:@"authenticationType"];
+		_authenticationMode = [decoder decodeObjectForKey:@"authenticationMode"];
+		_locationIP = [decoder decodeObjectForKey:@"locationIP"];
+		_locationCity = [decoder decodeObjectForKey:@"locationCity"];
+		_locationCity = [decoder decodeObjectForKey:@"locationCity"];
+		_logState = [self displayTypeForWonderfulName:[decoder decodeObjectForKey:@"logState"]];
+		_errorMessage = [decoder decodeObjectForKey:@"errorMessage"];
+	}
+	return self;
+}
+
+- (BOOL)isEqual:(id)object
+{
+    BOOL result = NO;
+
+    if ([object isKindOfClass:[self class]]) {
+        UserLoginInfo *otherLog = object;
+		
+        result = [self.application isEqualToString:[otherLog application]] &&
+        [self.userName isEqualToString:[otherLog userName]] &&
+		[self.created isEqualToString: [otherLog created]];
     }
+
+    return result;
+}
+
+- (NSUInteger)hash
+{
+    NSUInteger result = 1;
+    NSUInteger prime = 31;
+
+    result = prime * result + [_userName hash];
+    result = prime * result + [_application hash];
+	result = prime * result + [_created hash];
+	
+    return result;
+}
 
 
 @end
