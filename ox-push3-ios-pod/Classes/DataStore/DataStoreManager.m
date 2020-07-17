@@ -157,7 +157,7 @@
     
 	TokenEntity* token = [self getTokenEntityForApplication:app userName:userName];
 	
-	if token != nil {
+	if (token != nil) {
 		[tokenArray removeObject: token];
 	}
     
