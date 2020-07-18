@@ -21,7 +21,7 @@
 -(TokenEntity*)getTokenEntityForApplication:(NSString*)app userName:(NSString*)userName;
 -(NSArray*)getTokenEntities;
 -(TokenEntity*)getTokenEntityByKeyHandle:(NSString*)keyHandle;
--(BOOL)deleteTokenEntityForApplication:(NSString*)app userName:(NSString*) userName;
+-(BOOL)deleteTokenEntity:(TokenEntity *)token;
 
 -(void)saveUserLoginInfo:(UserLoginInfo*)userLoginInfo;
 -(NSArray*)getUserLoginInfo;
@@ -31,6 +31,6 @@
 
 - (BOOL)isUniqueTokenName:(NSString *)tokenName;
 
-- (void)editTokenName:(TokenEntity *)tokenEdited name:(NSString *) newName;
+- (void)editToken:(TokenEntity *)tokenEdited name:(NSString *) newName;
 
 @end
