@@ -144,6 +144,7 @@
 		intCount += 1;
 		token.count = [NSString stringWithFormat:@"%d", intCount];
 		[self saveUpdatedTokenArray: tokenArray];
+		return intCount;
 	}
 
     return 0;
