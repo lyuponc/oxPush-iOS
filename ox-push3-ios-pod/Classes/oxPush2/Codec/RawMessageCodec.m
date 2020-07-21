@@ -22,12 +22,18 @@
     return signedData;
 }
 
--(NSData*)encodeAuthenticateSignedBytes:(NSData*)applicationSha256 userPresence:(NSData*)userPresence counter:(int)counter challengeSha256:(NSData*)challengeSha256{
-    
+-(NSData*)encodeAuthenticateSignedBytes:(NSData*)applicationSha256 userPresence:(NSData*)userPresence counter:(int32_t)counter challengeSha256:(NSData*)challengeSha256{
+	
+	NSMutableData *rawData = [[NSMutableData alloc] init];
+	uint32_t rawInt = counter;
+	[rawData appendBytes:&rawInt length:4];
+	NSLog(@"COUNTER VALUE: %@", rawData);
+	
     NSMutableData* signedData = [[NSMutableData alloc] init];
     [signedData appendData:applicationSha256];
     [signedData appendData:userPresence];
-    [signedData appendBytes:&counter length:sizeof(counter)];
+	// https://stackoverflow.com/questions/28680589/how-to-convert-an-int-into-nsdata-in-swift/43247959
+	[signedData appendBytes:&counter length:4]; // eric  //sizeof(counter)];
     [signedData appendData:challengeSha256];
     
     return signedData;

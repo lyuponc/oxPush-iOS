@@ -170,6 +170,7 @@ Byte CHECK_ONLY = 0x07;
     NSData *clientData = [NSJSONSerialization dataWithJSONObject:clientMutableData options:NSJSONWritingPrettyPrinted error:nil];
     NSString* clientDataString = [clientData base64EncodedStringWithOptions:0];
     
+	// eric, this is where the encoding happens
     NSData* resp = [codec encodeAuthenticateResponse:authenticateResponse];
     
     NSMutableDictionary* response = [[NSMutableDictionary alloc] init];

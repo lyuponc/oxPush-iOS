@@ -156,6 +156,7 @@
     }];
 }
 
+// eric this is where the actual authenticate call happens. The tokenResponse is the final data.
 -(void)handleTokenResponse:(TokenResponse*) tokenResponse baseUrl:(NSString*)baseUrl isDecline:(BOOL)isDecline callback:(RequestCompletionHandler)handler {
     if (tokenResponse == nil){
         handler(nil , nil);
@@ -185,12 +186,5 @@
     [TokenDevice sharedInstance].deviceToken = devicePushToken;
 }
 
--(NSArray*)getLogs{
-    return [[DataStoreManager sharedInstance] getUserLoginInfo];
-}
-
--(NSArray*)getKeys{
-    return [[DataStoreManager sharedInstance] getTokenEntities];
-}
 
 @end

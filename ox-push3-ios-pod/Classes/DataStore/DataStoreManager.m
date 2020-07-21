@@ -6,6 +6,14 @@
 //  Copyright © 2016 Nazar Yavornytskyy. All rights reserved.
 //
 
+//
+//  DataStoreManager.m
+//  oxPush2-IOS
+//
+//  Created by Nazar Yavornytskyy on 2/3/16.
+//  Copyright © 2016 Nazar Yavornytskyy. All rights reserved.
+//
+
 #import "DataStoreManager.h"
 #import <CoreData/CoreData.h>
 #import "UserLoginInfo.h"
@@ -16,39 +24,43 @@
 #define USER_INFO_ENTITIES @"LoginInfoEntities"
 
 @implementation DataStoreManager{
+	
+	NSMutableArray *tokens;
+	NSMutableArray *logs;
 
 }
 
 + (instancetype) sharedInstance {
-    static id instance = nil;
+    static DataStoreManager* instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        instance = [[self alloc] init];
+        instance = [[DataStoreManager alloc] init];
+		instance->tokens = [instance getTokenEntities];
+		instance->logs = [instance getUserLoginInfo];
     });
     return instance;
 }
 
+- (NSArray *)keys {
+	return tokens;
+}
+
 -(void)saveTokenEntity:(TokenEntity*)tokenEntity {
+		
+	[tokens removeObject: tokenEntity];
 	
-	NSMutableArray* tokenArray = [[self getTokenEntities] mutableCopy];
-	TokenEntity * token = [self getTokenEntity:tokenEntity fromArray:tokenArray];
-	
-	[tokenArray removeObject: token];
-	
-    if (tokenArray != nil){
-        [tokenArray insertObject:tokenEntity atIndex:0];
+    if (tokens != nil){
+        [tokens insertObject:tokenEntity atIndex:0];
     } else {
-        tokenArray = [[NSMutableArray alloc] initWithObjects:tokenEntity, nil];
+        tokens = [[NSMutableArray alloc] initWithObjects:tokenEntity, nil];
     }
     
-	[self saveUpdatedTokenArray: tokenArray];
-    
+	[self saveTokens];
 }
 
 - (BOOL)isUniqueTokenName:(NSString *)tokenName {
-	NSMutableArray* tokenArray = [[self getTokenEntities] mutableCopy];
     
-	for (TokenEntity *token in tokenArray) {
+	for (TokenEntity *token in tokens) {
 		if ([token.keyName isEqualToString:tokenName] == true) {
 			return false;
 		} else {
@@ -60,10 +72,8 @@
 }
     
 -(TokenEntity*)getTokenEntityForApplication:(NSString*)app userName:(NSString*)userName {
-	
-    NSMutableArray* tokenArray = [[self getTokenEntities] mutableCopy];
-    
-	for (TokenEntity *token in tokenArray) {
+	    
+	for (TokenEntity *token in tokens) {
 		if ([token.application isEqualToString:app] && [token.userName isEqualToString: userName]) {
 			return token;
 		}
@@ -74,42 +84,44 @@
     
 // returns unarchived array of tokens or an empty array
 
--(NSArray *)getTokenEntities{
-    NSMutableArray* tokens = [[NSMutableArray alloc] init];
-    NSArray* tokenArray = [[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES];
+-(NSMutableArray *)getTokenEntities{
 	
-    if (tokenArray != nil){
-        for (NSData* tokenData in tokenArray){
-            TokenEntity* token = [NSKeyedUnarchiver unarchiveObjectWithData:tokenData];
-            [tokens addObject:token];
-        }
-    }
-    return tokens;
+	if (tokens == nil) {
+		tokens = [[NSMutableArray alloc] init];
+		
+		NSArray* tokenArray = [[NSUserDefaults standardUserDefaults] valueForKey:KEY_ENTITIES];
+		
+		if (tokenArray != nil){
+			for (NSData* tokenData in tokenArray){
+				TokenEntity* token = [NSKeyedUnarchiver unarchiveObjectWithData:tokenData];
+				[tokens addObject:token];
+			}
+		}
+	}
+	
+	return tokens;
 }
 
-- (void)editToken:(TokenEntity *)tokenEdited name:(NSString *)newName {
-	
-	NSMutableArray* tokenArray = [[self getTokenEntities] mutableCopy];
-	TokenEntity *token = [self getTokenEntity:tokenEdited fromArray: tokenArray];
+- (void)editToken:(TokenEntity *)token name:(NSString *)newName {
 	
 	if (token != nil) {
 		token.keyName = newName;
-		[self saveUpdatedTokenArray: tokenArray];
+		[self saveTokens];
 	}
 }
 
-- (TokenEntity*)getTokenEntity:(TokenEntity *)token fromArray:(NSArray *)tokenArray {
-	if (tokenArray != nil && [tokenArray containsObject: token]) {
-		return [tokenArray objectAtIndex: [tokenArray indexOfObject: token]];
+- (TokenEntity*)getTokenEntity:(TokenEntity *)token {
+	
+	if (tokens != nil && [tokens containsObject: token]) {
+		return [tokens objectAtIndex: [tokens indexOfObject: token]];
 	}
 	
 	return nil;
 }
 
 -(TokenEntity*)getTokenEntityByKeyHandle:(NSString*)keyHandle {
-	NSMutableArray* tokenArray = [[self getTokenEntities] mutableCopy];
 
-	for (TokenEntity *token in tokenArray) {
+	for (TokenEntity *token in tokens) {
 		if ([token.keyHandle isEqualToString:keyHandle]) {
 			return token;
 		}
@@ -118,9 +130,28 @@
     return nil;
 }
 
-- (void)saveUpdatedTokenArray:(NSMutableArray *)tokenArray {
-	NSMutableArray *archiveArray = [NSMutableArray arrayWithCapacity:tokenArray.count];
-	for (TokenEntity *tokenEntity in tokenArray) {
+-(BOOL)deleteTokenEntity:(TokenEntity *)token {
+    
+	[tokens removeObject: token];
+    
+	[self saveTokens];
+    
+	return NO;
+}
+
+-(int)incrementCountForToken:(TokenEntity*)tokenEntity {
+    	
+	int intCount = [tokenEntity.count intValue];
+	intCount += 1;
+	tokenEntity.count = [NSString stringWithFormat:@"%d", intCount];
+	[self saveTokens];
+	return intCount;
+
+}
+
+- (void)saveTokens {
+	NSMutableArray *archiveArray = [NSMutableArray arrayWithCapacity:tokens.count];
+	for (TokenEntity *tokenEntity in tokens) {
 		if ([tokenEntity isKindOfClass:[NSData class]]){
 			[archiveArray addObject:tokenEntity];
 		} else {
@@ -134,65 +165,46 @@
 	NSLog(@"Saved updated Token Array");
 }
 
--(int)incrementCountForToken:(TokenEntity*)tokenEntity {
-    
-	NSMutableArray* tokenArray = [[self getTokenEntities] mutableCopy];
-	TokenEntity *token = [self getTokenEntity:tokenEntity fromArray: tokenArray];
-	
-	if (token) {
-		int intCount = [token.count intValue];
-		intCount += 1;
-		token.count = [NSString stringWithFormat:@"%d", intCount];
-		[self saveUpdatedTokenArray: tokenArray];
-		return intCount;
-	}
-
-    return 0;
-}
-
--(BOOL)deleteTokenEntity:(TokenEntity *)token {
-    
-	NSMutableArray* tokenArray = [[self getTokenEntities] mutableCopy];
-	[tokenArray removeObject: token];
-    
-	[self saveUpdatedTokenArray: tokenArray];
-    
-	return NO;
+- (NSArray *)userLogs {
+	return logs;
 }
 
 -(void)saveUserLoginInfo:(UserLoginInfo*)userLoginInfo{
     
-	NSMutableArray* tokenArray = [[self getUserLoginInfo] mutableCopy];
-	[tokenArray addObject: userLoginInfo];
+	[logs addObject: userLoginInfo];
 	
-	[self saveUpdatedUserLoginInfo: tokenArray];
+	[self saveLogs];
 }
 
--(NSArray*)getUserLoginInfo{
-    NSMutableArray* logs = [[NSMutableArray alloc] init];
-    NSMutableArray* logsDataArray = [[NSUserDefaults standardUserDefaults] valueForKey:USER_INFO_ENTITIES];
-    if (logsDataArray != nil){
-        for (NSData* logsData in logsDataArray){
-            UserLoginInfo* info = (UserLoginInfo*)[NSKeyedUnarchiver unarchiveObjectWithData:logsData];
-            [logs addObject:info];
-        }
-    }
+-(NSMutableArray*)getUserLoginInfo{
+	if (logs == nil) {
+		logs = [[NSMutableArray alloc] init];
+		NSMutableArray* logsDataArray = [[NSUserDefaults standardUserDefaults] valueForKey:USER_INFO_ENTITIES];
+		if (logsDataArray != nil){
+			for (NSData* logsData in logsDataArray){
+				UserLoginInfo* info = (UserLoginInfo*)[NSKeyedUnarchiver unarchiveObjectWithData:logsData];
+				[logs addObject:info];
+			}
+		}
+	}
+	
     return logs;
 }
 
--(void)deleteLogs:(NSArray*)logs{
-	NSMutableArray* existingLogs = [[self getUserLoginInfo] mutableCopy];
+-(void)deleteLogs:(NSArray*)logsToDelete{
     
-	for (UserLoginInfo* log in logs){
-		[existingLogs removeObject: log];
+	for (UserLoginInfo* log in logsToDelete){
+		[logs removeObject: log];
     }
 	
-	[self saveUpdatedUserLoginInfo: existingLogs];
+	[self saveLogs];
 }
 
 -(void)deleteLog:(UserLoginInfo*) log {
-	NSArray* existingLogs = [NSArray arrayWithObjects:log];
-	[self deleteLogs: existingLogs];
+
+	[logs removeObject: log];
+	
+	[self saveLogs];
 }
 
 -(BOOL)deleteAllLogs {
@@ -200,7 +212,7 @@
 	return YES;
 }
 
-- (void)saveUpdatedUserLoginInfo:(NSMutableArray *) logs {
+- (void)saveLogs {
 	NSMutableArray *archiveArray = [NSMutableArray arrayWithCapacity: logs.count];
 	for (UserLoginInfo *userLoginEntity in logs) {
 		NSData *personEncodedObject = [NSKeyedArchiver archivedDataWithRootObject:userLoginEntity];
