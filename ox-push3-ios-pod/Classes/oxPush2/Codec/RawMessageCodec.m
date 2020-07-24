@@ -22,11 +22,11 @@
 	return signedData;
 }
 
--(NSData*)encodeAuthenticateSignedBytes:(NSData*)applicationSha256 userPresence:(NSData*)userPresence counter:(int)counter challengeSha256:(NSData*)challengeSha256 {
+-(NSData*)encodeAuthenticateSignedBytes:(NSData*)applicationSha256 userPresence:(NSData*)userPresence counter:(int32_t)counter challengeSha256:(NSData*)challengeSha256 {
 	
 	// https://stackoverflow.com/questions/1884262/swapping-endianness-in-objective-c
 	// U2F needs a bigEndian value
-	int bigInt = CFSwapInt32BigToHost(counter);
+	int bigInt = CFSwapInt32HostToBig(counter);
 
 	NSMutableData* signedData = [[NSMutableData alloc] init];
 	[signedData appendData:applicationSha256];
@@ -56,7 +56,7 @@
 	
 	// https://stackoverflow.com/questions/1884262/swapping-endianness-in-objective-c
 	// U2F needs a bigEndian value
-	int c = CFSwapInt32BigToHost(authenticateResponse.counter);
+	int c = CFSwapInt32HostToBig(authenticateResponse.counter);
 	
 	NSMutableData* resp = [[NSMutableData alloc] init];
 	[resp appendData:authenticateResponse.userPresence];
