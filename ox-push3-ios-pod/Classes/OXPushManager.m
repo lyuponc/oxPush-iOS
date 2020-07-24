@@ -36,7 +36,7 @@
     oneStep = username == nil ? YES : NO;
 
     if (app == nil && created == nil && issuer == nil) {
-        hander(nil, nil);
+        handler(nil, nil);
         return;
     }
 
