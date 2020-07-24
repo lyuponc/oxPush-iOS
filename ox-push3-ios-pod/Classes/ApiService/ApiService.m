@@ -170,24 +170,9 @@
 	// error or unsuccessful response
     } else {
         handler(nil, error);
-        NSString* erStr = [[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding];
-        NSLog(@"ERROR MESSAGE - %@", erStr);
-        NSError* error;
-        NSDictionary* jsonError = [NSJSONSerialization JSONObjectWithData:urlData
-                                                             options:kNilOptions
-                                                               error:&error];
-        NSString* errrorMessage = @"";
-        if (jsonError != nil){
-            NSString* reason = [jsonError valueForKey:@"error_description"];
-            if (reason != nil){
-                errrorMessage = reason;
-            } else {
-                errrorMessage = erStr;
-            }
-        } else {
-            errrorMessage = erStr;
-        }
 
+        NSString* errrorMessage = (urlData == nil) ? [self handleDefaultURLErrors: error] : [self handleCustomURLErrors: urlData];
+        
         if (isDecline) {
 			// not handling this currently
         } else {
@@ -202,6 +187,30 @@
             }
         }
     }
+}
+
+-(NSString*)handleDefaultURLErrors:(NSError*) error {
+    return [[error userInfo] valueForKey:@"NSLocalizedDescription"];
+}
+
+-(NSString*)handleCustomURLErrors:(NSData*) urlData {
+    NSString* erStr = [[NSString alloc] initWithData: urlData encoding: NSUTF8StringEncoding];
+    NSLog(@"ERROR MESSAGE - %@", erStr);
+    NSError* error;
+    NSDictionary* jsonError = [NSJSONSerialization JSONObjectWithData: urlData options: kNilOptions error: &error];
+    NSString* errrorMessage = @"";
+    if (jsonError != nil){
+        NSString* reason = [jsonError valueForKey: @"error_description"];
+        if (reason != nil){
+            errrorMessage = reason;
+        } else {
+            errrorMessage = erStr;
+        }
+    } else {
+        errrorMessage = erStr;
+    }
+    
+    return errrorMessage;
 }
 
 @end
