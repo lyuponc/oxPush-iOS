@@ -118,7 +118,7 @@ int keyHandleLength = 64;
         signedData = [[NSMutableData alloc] initWithData:[codec makeAuthenticateMessage:applicationSha256Data challengeSha256:challengeSha256Data keyHandle:request.keyHandle]];
         [self initBLEForAuthentication:signedData callback:handler];
     } else {
-        int count = [[DataStoreManager sharedInstance] incrementCountForToken:tokenEntity];
+		int32_t count = [[DataStoreManager sharedInstance] incrementCountForToken:tokenEntity];
         UserPresenceVerifier* userPres = [[UserPresenceVerifier alloc] init];
         NSData* userPresence = [userPres verifyUserPresence];
         signedData = [[NSMutableData alloc] initWithData:[codec encodeAuthenticateSignedBytes:applicationSha256 userPresence:userPresence counter:count challengeSha256:challengeSha256]];
