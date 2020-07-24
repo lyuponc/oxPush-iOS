@@ -21,6 +21,8 @@
 @property (strong, nonatomic) NSString* authenticationType;
 @property (strong, nonatomic) NSString* count;
 @property (strong, nonatomic) NSString* keyName;
+@property (strong, nonatomic) NSDate* createdAt;
+@property (nonatomic, assign) BOOL isCountUpdated;
 
 
 @end

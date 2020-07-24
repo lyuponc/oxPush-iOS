@@ -25,6 +25,7 @@
 	[encoder encodeObject:_authenticationType forKey:@"authenticationType"];
 	[encoder encodeObject:_count forKey:@"count"];
 	[encoder encodeObject:_keyName forKey:@"keyName"];
+	[encoder encodeBool:_isCountUpdated forKey:@"isCountUpdated"];
 }
     
 -(id)initWithCoder:(NSCoder *)decoder {
@@ -43,10 +44,12 @@
 		_authenticationType = [decoder decodeObjectForKey:@"authenticationType"];
 		_count = [decoder decodeObjectForKey:@"count"];
 		_keyName = [decoder decodeObjectForKey:@"keyName"];
+		_isCountUpdated = [decoder decodeBoolForKey:@"isCountUpdated"];
 	}
 	return self;
 }
 
+// this does not use the timestamp or keyHandle. The purpose is so that we can remove old tokens for the same app/username
 - (BOOL)isEqual:(id)object
 {
     BOOL result = NO;
