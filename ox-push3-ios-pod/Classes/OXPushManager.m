@@ -64,7 +64,7 @@
 		NSString* authenticationEndpoint = [result objectForKey:@"authentication_endpoint"];
 		NSString* registrationEndpoint = [result objectForKey:@"registration_endpoint"];
 		
-		//Check if we're using cred manager - in that case "state"== null and we should use "enrollment" parameter
+		//Check if we're using casa - in that case "state"== null and we should use "enrollment" parameter
 		if (![[oxRequest enrollment] isEqualToString:@""]){
 			[requestParams setObject:[oxRequest enrollment] forKey:@"enrollment_code"];
 		} else {
