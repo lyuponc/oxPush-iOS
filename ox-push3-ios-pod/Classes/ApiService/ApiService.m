@@ -64,7 +64,7 @@
 -(void)callGETAPIService:(NSString*)url andParameters:(NSDictionary*)parameters andCallback:(RequestCompletionHandler)handler{
     AFHTTPSessionManager *manager = [self getAFHTTPRequestManager];
     
-    [manager GET:url parameters:parameters success:^(NSURLSessionDataTask *operation, id responseObject) {
+    [manager GET:url parameters:parameters headers: nil progress: nil success:^(NSURLSessionDataTask *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         handler(responseObject ,nil);
     } failure:^(NSURLSessionDataTask *operation, NSError *error) {
@@ -84,7 +84,7 @@
                                   serializerWithReadingOptions:NSJSONReadingAllowFragments];
     manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"application/x-www-form-urlencoded"];//x-www-form-urlencoded"];//application/json
     
-    [manager POST:url parameters:parameters success:^(NSURLSessionDataTask *operation, id responseObject) {
+    [manager POST:url parameters:parameters headers: nil progress: nil success:^(NSURLSessionDataTask *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         handler(responseObject ,nil);
     } failure:^(NSURLSessionDataTask *operation, NSError *error) {
