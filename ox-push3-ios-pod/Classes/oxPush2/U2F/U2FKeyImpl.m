@@ -22,7 +22,7 @@
 
 #define INIT_SECURE_CLICK_NOTIFICATION @"INIT_SECURE_CLICK_NOTIFICATION"
 
-Byte REGISTRATION_RESERVED_BYTE_VALUE = 0x05;
+Byte REGISTRATION_SIGNED_RESERVED_BYTE_VALUE = 0x00;
 int keyHandleLength = 64;
 
 @implementation U2FKeyImpl {
@@ -91,7 +91,7 @@ int keyHandleLength = 64;
         [signedData appendData:applicationSha256Data];
         [self initBLE:signedData crypto:crypto userPublicKey:userPublicKey keyHandle:keyHandle callback:handler];
     } else {
-        signedData = [[NSMutableData alloc] initWithData:[codec encodeEnrollementSignedBytes:REGISTRATION_RESERVED_BYTE_VALUE applicationSha256:applicationSha256 challengeSha256:challengeSha256 keyHandle:keyHandle userPublicKey:userPublicKey]];
+        signedData = [[NSMutableData alloc] initWithData:[codec encodeEnrollementSignedBytes:REGISTRATION_SIGNED_RESERVED_BYTE_VALUE applicationSha256:applicationSha256 challengeSha256:challengeSha256 keyHandle:keyHandle userPublicKey:userPublicKey]];
         EnrollmentResponse* response = [self makeEnrollmentResponse:signedData crypto:crypto userPublicKey:userPublicKey keyHandle:keyHandle];
         handler(response ,nil);
     }
@@ -123,8 +123,9 @@ int keyHandleLength = 64;
         NSData* userPresence = [userPres verifyUserPresence];
         signedData = [[NSMutableData alloc] initWithData:[codec encodeAuthenticateSignedBytes:applicationSha256 userPresence:userPresence counter:count challengeSha256:challengeSha256]];
         
-        GMEllipticCurveCrypto* crypto2 = [GMEllipticCurveCrypto generateKeyPairForCurve:
-                                          GMEllipticCurveSecp256r1];
+        GMEllipticCurveCrypto *crypto2 = [GMEllipticCurveCrypto cryptoForCurve:
+                            GMEllipticCurveSecp256r1];
+        crypto2.privateKeyBase64 = tokenEntity.privateKey;
         
         NSData *signature = [crypto2 hashSHA256AndSignDataEncoded:signedData];
         
@@ -134,9 +135,16 @@ int keyHandleLength = 64;
 }
 
 -(EnrollmentResponse*)makeEnrollmentResponse:(NSData*)signedData crypto:(GMEllipticCurveCrypto*)crypto userPublicKey:(NSData*) userPublicKey keyHandle:(NSData*) keyHandle{
-    NSData *signature = [crypto hashSHA256AndSignDataEncoded:signedData];
+    NSData* privateCertificate = [VENDOR_CERTIFICATE_PRIVATE_KEY dataFromHexString];
     
     NSData* sertificate = [VENDOR_CERTIFICATE_CERT dataFromHexString];
+
+    GMEllipticCurveCrypto *crypto3 = [GMEllipticCurveCrypto cryptoForCurve:
+                         GMEllipticCurveSecp256r1];
+
+    [crypto3 setPrivateKey:privateCertificate];
+
+    NSData *signature = [crypto3 hashSHA256AndSignDataEncoded:signedData];
     
     EnrollmentResponse* response = [[EnrollmentResponse alloc] initWithUserPublicKey:userPublicKey keyHandle:keyHandle attestationCertificate:sertificate signature:signature];
     
